@@ -4,7 +4,6 @@ services:
     container_name: jenkins
     restart: unless-stopped
     ports:
-      - "${JENKINS_PORT}:8080"
       - "${JENKINS_AGENT_PORT}:50000"
     volumes:
       - jenkins_home:/var/jenkins_home
@@ -12,6 +11,14 @@ services:
     user: root
     environment:
       TZ: ${TZ}
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.jenkins.rule=Host(`${JENKINS_URL}`)
+      - traefik.http.routers.jenkins.entrypoints=websecure
+      - traefik.http.routers.jenkins.tls=true
+      - traefik.http.services.jenkins.loadbalancer.server.port=${JENKINS_PORT}
+    networks:
+      - proxy
 
 volumes:
   jenkins_home:
